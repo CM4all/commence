@@ -30,47 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CommandLine.hxx"
-#include "Library.hxx"
-#include "PathDescriptor.hxx"
-#include "lua/RunFile.hxx"
-#include "lua/State.hxx"
-#include "lua/Util.hxx"
-#include "util/PrintException.hxx"
+#pragma once
 
-extern "C" {
-#include <lauxlib.h>
-#include <lualib.h>
-}
+struct lua_State;
+class FileDescriptor;
+class UniqueFileDescriptor;
 
-#include <stdlib.h>
+void
+RegisterLuaPathDescriptor(lua_State *L);
 
-static void
-SetupLuaState(lua_State *L)
-{
-	luaL_openlibs(L);
-	RegisterLuaPathDescriptor(L);
-	OpenLibrary(L);
-}
+UniqueFileDescriptor *
+NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src);
 
-static int
-Run(const CommandLine &cmdline)
-{
-	const Lua::State lua_state{luaL_newstate()};
-	SetupLuaState(lua_state.get());
-
-	Lua::SetGlobal(lua_state.get(), "path", cmdline.destination_path);
-
-	Lua::RunFile(lua_state.get(), cmdline.script_path);
-	return EXIT_SUCCESS;
-}
-
-int
-main(int argc, char **argv) noexcept
-try {
-	const auto cmdline = ParseCommandLine(argc, argv);
-	return Run(cmdline);
-} catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
-}
+FileDescriptor
+GetLuaPathDescriptor(lua_State *L, int idx);

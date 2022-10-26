@@ -118,6 +118,7 @@ executable('cm4all-commence',
   'src/CommandLine.cxx',
   'src/Main.cxx',
   'src/Library.cxx',
+  'src/PathDescriptor.cxx',
   include_directories: inc,
   dependencies: [
     liblua,

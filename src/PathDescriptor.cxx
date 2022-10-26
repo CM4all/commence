@@ -30,47 +30,64 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CommandLine.hxx"
-#include "Library.hxx"
 #include "PathDescriptor.hxx"
-#include "lua/RunFile.hxx"
-#include "lua/State.hxx"
-#include "lua/Util.hxx"
-#include "util/PrintException.hxx"
+#include "lua/Class.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 
 extern "C" {
 #include <lauxlib.h>
-#include <lualib.h>
 }
 
-#include <stdlib.h>
+#include <new>
 
-static void
-SetupLuaState(lua_State *L)
+#include <string.h>
+#include <fcntl.h> // for AT_FDCWD
+
+static constexpr char lua_unique_file_descriptor_class[] = "UniqueFileDescriptor";
+using LuaPathDescriptor = Lua::Class<UniqueFileDescriptor,
+				     lua_unique_file_descriptor_class>;
+
+static const UniqueFileDescriptor &
+CastLuaPathDescriptor(lua_State *L, int idx)
 {
-	luaL_openlibs(L);
-	RegisterLuaPathDescriptor(L);
-	OpenLibrary(L);
+	return LuaPathDescriptor::Cast(L, idx);
 }
 
 static int
-Run(const CommandLine &cmdline)
+LuaPathDescriptorToString(lua_State *L)
 {
-	const Lua::State lua_state{luaL_newstate()};
-	SetupLuaState(lua_state.get());
+	if (lua_gettop(L) != 1)
+		return luaL_error(L, "Invalid parameters");
 
-	Lua::SetGlobal(lua_state.get(), "path", cmdline.destination_path);
+	[[maybe_unused]]
+	const auto &fd = CastLuaPathDescriptor(L, 1);
 
-	Lua::RunFile(lua_state.get(), cmdline.script_path);
-	return EXIT_SUCCESS;
+	// TODO implement
+	return 0;
 }
 
-int
-main(int argc, char **argv) noexcept
-try {
-	const auto cmdline = ParseCommandLine(argc, argv);
-	return Run(cmdline);
-} catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
+void
+RegisterLuaPathDescriptor(lua_State *L)
+{
+	using namespace Lua;
+
+	LuaPathDescriptor::Register(L);
+	SetTable(L, RelativeStackIndex{-1}, "__tostring", LuaPathDescriptorToString);
+	lua_pop(L, 1);
+}
+
+UniqueFileDescriptor *
+NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src)
+{
+	return LuaPathDescriptor::New(L, std::move(src));
+}
+
+FileDescriptor
+GetLuaPathDescriptor(lua_State *L, int idx)
+{
+	if (lua_isnil(L, idx)) {
+		return FileDescriptor{AT_FDCWD};
+	} else {
+		return CastLuaPathDescriptor(L, idx);
+	}
 }
