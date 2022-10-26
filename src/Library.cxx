@@ -31,6 +31,7 @@
  */
 
 #include "Library.hxx"
+#include "PathDescriptor.hxx"
 #include "lua/Error.hxx"
 #include "lua/Util.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -60,12 +61,14 @@ l_make_directory(lua_State *L)
 	const char *path = lua_tostring(L, 1);
 
 	try {
-		MakeNestedDirectory(FileDescriptor{AT_FDCWD}, path);
+		NewLuaPathDescriptor(L,
+				     MakeNestedDirectory(FileDescriptor{AT_FDCWD},
+							 path));
 	} catch (...) {
 		Lua::RaiseCurrent(L);
 	}
 
-	return 0;
+	return 1;
 }
 
 static int
