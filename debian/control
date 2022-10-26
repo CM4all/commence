@@ -1,0 +1,20 @@
+Source: cm4all-commence
+Section: non-free/admin
+Priority: extra
+Maintainer: Max Kellermann <mk@cm4all.com>
+Build-Depends: debhelper (>= 13.3~),
+ meson (>= 0.56),
+ g++ (>= 4:10),
+ libc6-dev (>= 2.13),
+ libcm4all-fox-dev (>= 2),
+ libluajit-5.1-dev
+Standards-Version: 4.0.0
+Vcs-Browser: http://dev.intern.cm-ag/core/commence
+Vcs-Git: git@dev.intern.cm-ag:core/commence.git
+
+Package: cm4all-commence
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Hosting package installer
+ Commence is a Lua scripting engine optimized for installing packages
+ into a CM4all hosting account.
