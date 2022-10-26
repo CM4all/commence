@@ -117,6 +117,7 @@ subdir('libcommon/src/net')
 executable('cm4all-commence',
   'src/CommandLine.cxx',
   'src/Main.cxx',
+  'src/Library.cxx',
   include_directories: inc,
   dependencies: [
     liblua,
