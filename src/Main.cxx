@@ -33,6 +33,9 @@
 #include "CommandLine.hxx"
 #include "Library.hxx"
 #include "Path.hxx"
+#include "io/MakeDirectory.hxx"
+#include "io/UniqueFileDescriptor.hxx"
+#include "lua/Assert.hxx"
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
@@ -43,6 +46,7 @@ extern "C" {
 #include <lualib.h>
 }
 
+#include <fcntl.h> // for AT_FDCWD
 #include <stdlib.h>
 
 static void
@@ -53,13 +57,25 @@ SetupLuaState(lua_State *L)
 	OpenLibrary(L);
 }
 
+static void
+SetGlobals(lua_State *L, const CommandLine &cmdline)
+{
+	const Lua::ScopeCheckStack check_stack{L};
+
+	NewLuaPathDescriptor(L,
+			     MakeDirectory(FileDescriptor{AT_FDCWD},
+					   cmdline.destination_path),
+			     cmdline.destination_path);
+	Lua::SetGlobal(L, "path", Lua::RelativeStackIndex{-1});
+	lua_pop(L, 1);
+}
+
 static int
 Run(const CommandLine &cmdline)
 {
 	const Lua::State lua_state{luaL_newstate()};
 	SetupLuaState(lua_state.get());
-
-	Lua::SetGlobal(lua_state.get(), "path", cmdline.destination_path);
+	SetGlobals(lua_state.get(), cmdline);
 
 	Lua::RunFile(lua_state.get(), cmdline.script_path);
 	return EXIT_SUCCESS;
