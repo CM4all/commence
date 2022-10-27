@@ -34,6 +34,7 @@
 #include "Library.hxx"
 #include "Path.hxx"
 #include "io/MakeDirectory.hxx"
+#include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "lua/Assert.hxx"
 #include "lua/RunFile.hxx"
@@ -57,10 +58,30 @@ SetupLuaState(lua_State *L)
 	OpenLibrary(L);
 }
 
+static std::string
+GetParentPath(std::string_view path) noexcept
+{
+	auto slash = path.rfind('/');
+	if (slash == path.npos)
+		return ".";
+
+	if (slash == 0)
+		return "/";
+
+	return std::string{path.substr(0, slash)};
+}
+
 static void
 SetGlobals(lua_State *L, const CommandLine &cmdline)
 {
 	const Lua::ScopeCheckStack check_stack{L};
+
+	const auto src = GetParentPath(cmdline.script_path);
+	NewLuaPathDescriptor(L,
+			     OpenPath(src.c_str(), O_DIRECTORY),
+			     src);
+	Lua::SetGlobal(L, "src", Lua::RelativeStackIndex{-1});
+	lua_pop(L, 1);
 
 	NewLuaPathDescriptor(L,
 			     MakeDirectory(FileDescriptor{AT_FDCWD},
