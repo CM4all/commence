@@ -51,6 +51,10 @@ struct PathDescriptor {
 		       std::string_view _path) noexcept
 		:fd(std::move(_fd)), path(_path) {}
 
+	operator PathReference() const noexcept {
+		return {fd, ""};
+	}
+
 	static int ToString(lua_State *L);
 };
 
@@ -62,6 +66,12 @@ static const auto &
 CastLuaPathDescriptor(lua_State *L, int idx)
 {
 	return LuaPathDescriptor::Cast(L, idx);
+}
+
+static const auto *
+CheckLuaPathDescriptor(lua_State *L, int idx)
+{
+	return LuaPathDescriptor::Check(L, idx);
 }
 
 int
@@ -95,12 +105,15 @@ NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src,
 	LuaPathDescriptor::New(L, std::move(src), path);
 }
 
-FileDescriptor
-GetLuaPathDescriptor(lua_State *L, int idx)
+PathReference
+GetLuaPath(lua_State *L, int idx)
 {
-	if (lua_isnil(L, idx)) {
-		return FileDescriptor{AT_FDCWD};
+	if (lua_isstring(L, idx)) {
+		return {FileDescriptor{AT_FDCWD}, lua_tostring(L, idx)};
+	} else if (auto *p = CheckLuaPathDescriptor(L, idx)) {
+		return *p;
 	} else {
-		return CastLuaPathDescriptor(L, idx).fd;
+		luaL_argerror(L, idx, "path expected");
+		return {}; // unreachable
 	}
 }
