@@ -81,6 +81,10 @@ public:
 		return {b.directory_fd, path.c_str()};
 	}
 
+	std::string GetPath() const noexcept {
+		return base.GetPath() + "/" + path;
+	}
+
 	static int ToString(lua_State *L);
 	static int Div(lua_State *L);
 };
@@ -153,7 +157,7 @@ RelativePath::ToString(lua_State *L)
 		return luaL_error(L, "Invalid parameters");
 
 	const auto &rp = CastLuaRelativePath(L, 1);
-	Lua::Push(L, rp.base.GetPath() + "/" + rp.path);
+	Lua::Push(L, rp.GetPath());
 	return 1;
 }
 
@@ -209,6 +213,21 @@ GetLuaPath(lua_State *L, int idx)
 		return *p;
 	} else if (auto *r = CheckLuaRelativePath(L, idx)) {
 		return *r;
+	} else {
+		luaL_argerror(L, idx, "path expected");
+		return {}; // unreachable
+	}
+}
+
+std::string
+GetLuaPathString(lua_State *L, int idx)
+{
+	if (lua_isstring(L, idx)) {
+		return lua_tostring(L, idx);
+	} else if (auto *p = CheckLuaPathDescriptor(L, idx)) {
+		return p->GetPath();
+	} else if (auto *r = CheckLuaRelativePath(L, idx)) {
+		return r->GetPath();
 	} else {
 		luaL_argerror(L, idx, "path expected");
 		return {}; // unreachable

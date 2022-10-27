@@ -34,6 +34,7 @@
 
 #include "io/FileDescriptor.hxx"
 
+#include <string>
 #include <string_view>
 
 struct lua_State;
@@ -54,3 +55,6 @@ NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src,
 
 PathReference
 GetLuaPath(lua_State *L, int idx);
+
+std::string
+GetLuaPathString(lua_State *L, int idx);
