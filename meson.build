@@ -119,6 +119,7 @@ executable('cm4all-commence',
   'src/Main.cxx',
   'src/Library.cxx',
   'src/Path.cxx',
+  'src/Template.cxx',
   include_directories: inc,
   dependencies: [
     liblua,
