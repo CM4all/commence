@@ -17,7 +17,7 @@ common_flags = [
 test_common_flags = [
   '-Wcast-align',
   '-Wcast-qual',
-  '-Wdouble-promotion',
+  #'-Wdouble-promotion', (disabled due to boost::json)
   '-Wfloat-equal',
   '-Wmissing-declarations',
   '-Wmissing-noreturn',
@@ -107,8 +107,10 @@ inc = include_directories('src', 'libcommon/src')
 
 libcommon_enable_c = false
 libcommon_enable_net_log = false
+libcommon_enable_json = true
 
 subdir('libcommon/src/util')
+subdir('libcommon/src/json')
 subdir('libcommon/src/lua')
 subdir('libcommon/src/io')
 subdir('libcommon/src/system')
@@ -126,6 +128,7 @@ executable('cm4all-commence',
     io_dep,
     util_dep,
     lua_dep,
+    boost_json_dep,
     libfox,
   ],
   install: true,
