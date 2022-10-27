@@ -50,6 +50,8 @@ struct PathDescriptor {
 	PathDescriptor(UniqueFileDescriptor &&_fd,
 		       std::string_view _path) noexcept
 		:fd(std::move(_fd)), path(_path) {}
+
+	static int ToString(lua_State *L);
 };
 
 static constexpr char lua_unique_file_descriptor_class[] = "PathDescriptor";
@@ -62,8 +64,8 @@ CastLuaPathDescriptor(lua_State *L, int idx)
 	return LuaPathDescriptor::Cast(L, idx);
 }
 
-static int
-LuaPathDescriptorToString(lua_State *L)
+int
+PathDescriptor::ToString(lua_State *L)
 {
 	if (lua_gettop(L) != 1)
 		return luaL_error(L, "Invalid parameters");
@@ -81,7 +83,8 @@ RegisterLuaPath(lua_State *L) noexcept
 	using namespace Lua;
 
 	LuaPathDescriptor::Register(L);
-	SetTable(L, RelativeStackIndex{-1}, "__tostring", LuaPathDescriptorToString);
+	SetTable(L, RelativeStackIndex{-1},
+		 "__tostring", PathDescriptor::ToString);
 	lua_pop(L, 1);
 }
 
