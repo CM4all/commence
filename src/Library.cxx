@@ -62,8 +62,8 @@ l_make_directory(lua_State *L)
 
 	try {
 		NewLuaPathDescriptor(L,
-				     MakeNestedDirectory(FileDescriptor{AT_FDCWD},
-							 path));
+				     MakeNestedDirectory(FileDescriptor{AT_FDCWD}, path),
+				     path);
 	} catch (...) {
 		Lua::RaiseCurrent(L);
 	}

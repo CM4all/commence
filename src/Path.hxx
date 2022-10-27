@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <string_view>
+
 struct lua_State;
 class FileDescriptor;
 class UniqueFileDescriptor;
@@ -39,8 +41,9 @@ class UniqueFileDescriptor;
 void
 RegisterLuaPath(lua_State *L);
 
-UniqueFileDescriptor *
-NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src);
+void
+NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src,
+		     std::string_view path);
 
 FileDescriptor
 GetLuaPathDescriptor(lua_State *L, int idx);

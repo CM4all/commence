@@ -38,16 +38,24 @@ extern "C" {
 #include <lauxlib.h>
 }
 
-#include <new>
+#include <string>
 
 #include <string.h>
 #include <fcntl.h> // for AT_FDCWD
 
-static constexpr char lua_unique_file_descriptor_class[] = "UniqueFileDescriptor";
-using LuaPathDescriptor = Lua::Class<UniqueFileDescriptor,
+struct PathDescriptor {
+	UniqueFileDescriptor fd;
+	std::string path;
+
+	PathDescriptor(UniqueFileDescriptor &&_fd, std::string_view _path)
+		:fd(std::move(_fd)), path(_path) {}
+};
+
+static constexpr char lua_unique_file_descriptor_class[] = "PathDescriptor";
+using LuaPathDescriptor = Lua::Class<PathDescriptor,
 				     lua_unique_file_descriptor_class>;
 
-static const UniqueFileDescriptor &
+static const auto &
 CastLuaPathDescriptor(lua_State *L, int idx)
 {
 	return LuaPathDescriptor::Cast(L, idx);
@@ -60,10 +68,10 @@ LuaPathDescriptorToString(lua_State *L)
 		return luaL_error(L, "Invalid parameters");
 
 	[[maybe_unused]]
-	const auto &fd = CastLuaPathDescriptor(L, 1);
+	const auto &pd = CastLuaPathDescriptor(L, 1);
 
-	// TODO implement
-	return 0;
+	Lua::Push(L, pd.path);
+	return 1;
 }
 
 void
@@ -76,10 +84,11 @@ RegisterLuaPath(lua_State *L)
 	lua_pop(L, 1);
 }
 
-UniqueFileDescriptor *
-NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src)
+void
+NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src,
+		     std::string_view path)
 {
-	return LuaPathDescriptor::New(L, std::move(src));
+	LuaPathDescriptor::New(L, std::move(src), path);
 }
 
 FileDescriptor
@@ -88,6 +97,6 @@ GetLuaPathDescriptor(lua_State *L, int idx)
 	if (lua_isnil(L, idx)) {
 		return FileDescriptor{AT_FDCWD};
 	} else {
-		return CastLuaPathDescriptor(L, idx);
+		return CastLuaPathDescriptor(L, idx).fd;
 	}
 }
