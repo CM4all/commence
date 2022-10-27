@@ -34,5 +34,4 @@
 
 struct lua_State;
 
-void
-OpenLibrary(lua_State *L) noexcept;
+void OpenLibrary(lua_State *L) noexcept;

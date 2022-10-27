@@ -33,13 +33,13 @@
 #include "Library.hxx"
 #include "Path.hxx"
 #include "Template.hxx"
+#include "io/FileWriter.hxx"
+#include "io/MakeDirectory.hxx"
+#include "io/Open.hxx"
+#include "io/RecursiveDelete.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "lua/Error.hxx"
 #include "lua/Util.hxx"
-#include "io/UniqueFileDescriptor.hxx"
-#include "io/MakeDirectory.hxx"
-#include "io/RecursiveDelete.hxx"
-#include "io/FileWriter.hxx"
-#include "io/Open.hxx"
 #include "system/Error.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
@@ -55,120 +55,102 @@ extern "C" {
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-static int
-l_make_directory(lua_State *L)
-{
-	if (lua_gettop(L) != 1)
-		return luaL_error(L, "Invalid parameter count");
+static int l_make_directory(lua_State *L) {
+    if (lua_gettop(L) != 1)
+        return luaL_error(L, "Invalid parameter count");
 
-	const auto path = GetLuaPath(L, 1);
+    const auto path = GetLuaPath(L, 1);
 
-	try {
-		NewLuaPathDescriptor(L,
-				     MakeNestedDirectory(path.directory_fd,
-							 path.relative_path),
-				     GetLuaPathString(L, 1));
-	} catch (...) {
-		Lua::RaiseCurrent(L);
-	}
+    try {
+        NewLuaPathDescriptor(
+            L, MakeNestedDirectory(path.directory_fd, path.relative_path),
+            GetLuaPathString(L, 1));
+    } catch (...) {
+        Lua::RaiseCurrent(L);
+    }
 
-	return 1;
+    return 1;
 }
 
-static int
-l_recursive_copy(lua_State *L)
-{
-	if (lua_gettop(L) != 2)
-		return luaL_error(L, "Invalid parameter count");
+static int l_recursive_copy(lua_State *L) {
+    if (lua_gettop(L) != 2)
+        return luaL_error(L, "Invalid parameter count");
 
-	const auto source_path = GetLuaPathString(L, 1);
-	const auto destination_path = GetLuaPathString(L, 2);
+    const auto source_path = GetLuaPathString(L, 1);
+    const auto destination_path = GetLuaPathString(L, 2);
 
-	constexpr unsigned options = FOX_CP_DEVICE|FOX_CP_INODE;
+    constexpr unsigned options = FOX_CP_DEVICE | FOX_CP_INODE;
 
-	try {
-		fox_error_t error;
-		fox_status_t status = fox_copy(source_path.c_str(),
-					       destination_path.c_str(),
-					       options, &error);
-		if (status != FOX_STATUS_SUCCESS)
-			throw FormatErrno(status, "Copying '%s' failed", error.pathname);
-	} catch (...) {
-		Lua::RaiseCurrent(L);
-	}
+    try {
+        fox_error_t error;
+        fox_status_t status = fox_copy(
+            source_path.c_str(), destination_path.c_str(), options, &error);
+        if (status != FOX_STATUS_SUCCESS)
+            throw FormatErrno(status, "Copying '%s' failed", error.pathname);
+    } catch (...) {
+        Lua::RaiseCurrent(L);
+    }
 
-	return 0;
+    return 0;
 }
 
-static int
-l_recursive_delete(lua_State *L)
-{
-	if (lua_gettop(L) != 1)
-		return luaL_error(L, "Invalid parameter count");
+static int l_recursive_delete(lua_State *L) {
+    if (lua_gettop(L) != 1)
+        return luaL_error(L, "Invalid parameter count");
 
-	const auto path = GetLuaPath(L, 1);
+    const auto path = GetLuaPath(L, 1);
 
-	try {
-		RecursiveDelete(path.directory_fd, path.relative_path);
-	} catch (...) {
-		Lua::RaiseCurrent(L);
-	}
+    try {
+        RecursiveDelete(path.directory_fd, path.relative_path);
+    } catch (...) {
+        Lua::RaiseCurrent(L);
+    }
 
-	return 0;
+    return 0;
 }
 
-static int
-l_copy_template(lua_State *L)
-try {
-	if (lua_gettop(L) != 2)
-		return luaL_error(L, "Invalid parameter count");
+static int l_copy_template(lua_State *L) try {
+    if (lua_gettop(L) != 2)
+        return luaL_error(L, "Invalid parameter count");
 
-	const auto source = GetLuaPath(L, 1);
-	const auto destination = GetLuaPath(L, 2);
+    const auto source = GetLuaPath(L, 1);
+    const auto destination = GetLuaPath(L, 2);
 
-	const auto source_fd = OpenReadOnly(source.directory_fd,
-					    source.relative_path);
+    const auto source_fd =
+        OpenReadOnly(source.directory_fd, source.relative_path);
 
-	struct stat st;
-	if (fstat(source_fd.Get(), &st) < 0)
-		throw FormatErrno("Failed to stat %s",
-				  source.relative_path);
+    struct stat st;
+    if (fstat(source_fd.Get(), &st) < 0)
+        throw FormatErrno("Failed to stat %s", source.relative_path);
 
-	if (st.st_size > 1024 * 1024)
-		throw FormatRuntimeError("File too large: %s",
-					 source.relative_path);
+    if (st.st_size > 1024 * 1024)
+        throw FormatRuntimeError("File too large: %s", source.relative_path);
 
-	std::size_t source_size = st.st_size;
+    std::size_t source_size = st.st_size;
 
-	char *source_data = (char *)
-		mmap(nullptr, source_size, PROT_READ, MAP_SHARED,
-		     source_fd.Get(), 0);
-	if (source_data == (char *)-1)
-		throw FormatErrno("Failed to map %s", source.relative_path);
+    char *source_data = (char *)mmap(nullptr, source_size, PROT_READ,
+                                     MAP_SHARED, source_fd.Get(), 0);
+    if (source_data == (char *)-1)
+        throw FormatErrno("Failed to map %s", source.relative_path);
 
-	AtScopeExit(source_data, source_size) {
-		munmap(source_data, source_size);
-	};
+    AtScopeExit(source_data, source_size) { munmap(source_data, source_size); };
 
-	madvise(source_data, source_size, MADV_WILLNEED);
+    madvise(source_data, source_size, MADV_WILLNEED);
 
-	FileWriter writer{destination.directory_fd, destination.relative_path};
-	RunTemplate(L, {source_data, source_size}, [&writer](auto s){
-		writer.Write(s.data(), s.size());
-	});
+    FileWriter writer{destination.directory_fd, destination.relative_path};
+    RunTemplate(L, {source_data, source_size},
+                [&writer](auto s) { writer.Write(s.data(), s.size()); });
 
-	writer.Commit();
+    writer.Commit();
 
-	return 0;
+    return 0;
 } catch (...) {
-	Lua::RaiseCurrent(L);
+    Lua::RaiseCurrent(L);
 }
 
-void
-OpenLibrary(lua_State *L) noexcept
-{
-	Lua::SetGlobal(L, "make_directory", l_make_directory);
-	Lua::SetGlobal(L, "recursive_copy", l_recursive_copy);
-	Lua::SetGlobal(L, "recursive_delete", l_recursive_delete);
-	Lua::SetGlobal(L, "copy_template", l_copy_template);
+void OpenLibrary(lua_State *L) noexcept {
+    Lua::SetGlobal(L, "make_directory", l_make_directory);
+    Lua::SetGlobal(L, "recursive_copy", l_recursive_copy);
+    Lua::SetGlobal(L, "recursive_delete", l_recursive_delete);
+    Lua::SetGlobal(L, "copy_template", l_copy_template);
 }

@@ -50,64 +50,51 @@ extern "C" {
 #include <fcntl.h> // for AT_FDCWD
 #include <stdlib.h>
 
-static void
-SetupLuaState(lua_State *L)
-{
-	luaL_openlibs(L);
-	RegisterLuaPath(L);
-	OpenLibrary(L);
+static void SetupLuaState(lua_State *L) {
+    luaL_openlibs(L);
+    RegisterLuaPath(L);
+    OpenLibrary(L);
 }
 
-static std::string
-GetParentPath(std::string_view path) noexcept
-{
-	auto slash = path.rfind('/');
-	if (slash == path.npos)
-		return ".";
+static std::string GetParentPath(std::string_view path) noexcept {
+    auto slash = path.rfind('/');
+    if (slash == path.npos)
+        return ".";
 
-	if (slash == 0)
-		return "/";
+    if (slash == 0)
+        return "/";
 
-	return std::string{path.substr(0, slash)};
+    return std::string{path.substr(0, slash)};
 }
 
-static void
-SetGlobals(lua_State *L, const CommandLine &cmdline)
-{
-	const Lua::ScopeCheckStack check_stack{L};
+static void SetGlobals(lua_State *L, const CommandLine &cmdline) {
+    const Lua::ScopeCheckStack check_stack{L};
 
-	const auto src = GetParentPath(cmdline.script_path);
-	NewLuaPathDescriptor(L,
-			     OpenPath(src.c_str(), O_DIRECTORY),
-			     src);
-	Lua::SetGlobal(L, "src", Lua::RelativeStackIndex{-1});
-	lua_pop(L, 1);
+    const auto src = GetParentPath(cmdline.script_path);
+    NewLuaPathDescriptor(L, OpenPath(src.c_str(), O_DIRECTORY), src);
+    Lua::SetGlobal(L, "src", Lua::RelativeStackIndex{-1});
+    lua_pop(L, 1);
 
-	NewLuaPathDescriptor(L,
-			     MakeDirectory(FileDescriptor{AT_FDCWD},
-					   cmdline.destination_path),
-			     cmdline.destination_path);
-	Lua::SetGlobal(L, "path", Lua::RelativeStackIndex{-1});
-	lua_pop(L, 1);
+    NewLuaPathDescriptor(
+        L, MakeDirectory(FileDescriptor{AT_FDCWD}, cmdline.destination_path),
+        cmdline.destination_path);
+    Lua::SetGlobal(L, "path", Lua::RelativeStackIndex{-1});
+    lua_pop(L, 1);
 }
 
-static int
-Run(const CommandLine &cmdline)
-{
-	const Lua::State lua_state{luaL_newstate()};
-	SetupLuaState(lua_state.get());
-	SetGlobals(lua_state.get(), cmdline);
+static int Run(const CommandLine &cmdline) {
+    const Lua::State lua_state{luaL_newstate()};
+    SetupLuaState(lua_state.get());
+    SetGlobals(lua_state.get(), cmdline);
 
-	Lua::RunFile(lua_state.get(), cmdline.script_path);
-	return EXIT_SUCCESS;
+    Lua::RunFile(lua_state.get(), cmdline.script_path);
+    return EXIT_SUCCESS;
 }
 
-int
-main(int argc, char **argv) noexcept
-try {
-	const auto cmdline = ParseCommandLine(argc, argv);
-	return Run(cmdline);
+int main(int argc, char **argv) noexcept try {
+    const auto cmdline = ParseCommandLine(argc, argv);
+    return Run(cmdline);
 } catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
+    PrintException(std::current_exception());
+    return EXIT_FAILURE;
 }

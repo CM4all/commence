@@ -35,10 +35,9 @@
 #include <string>
 
 struct CommandLine {
-	const char *script_path = nullptr;
+    const char *script_path = nullptr;
 
-	const char *destination_path = nullptr;
+    const char *destination_path = nullptr;
 };
 
-CommandLine
-ParseCommandLine(int argc, char **argv);
+CommandLine ParseCommandLine(int argc, char **argv);

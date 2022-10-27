@@ -39,5 +39,5 @@ struct lua_State;
 
 using TemplateWriteCallback = std::function<void(std::string_view)>;
 
-void
-RunTemplate(lua_State *L, std::string_view t, TemplateWriteCallback callback);
+void RunTemplate(lua_State *L, std::string_view t,
+                 TemplateWriteCallback callback);

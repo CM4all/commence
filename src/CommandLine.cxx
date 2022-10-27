@@ -32,15 +32,12 @@
 
 #include "CommandLine.hxx"
 
-CommandLine
-ParseCommandLine(int argc, char **argv)
-{
-	if (argc != 3)
-		throw "Usage: cm4all-commence SCRIPT_PATH DESTINATION_PATH";
+CommandLine ParseCommandLine(int argc, char **argv) {
+    if (argc != 3)
+        throw "Usage: cm4all-commence SCRIPT_PATH DESTINATION_PATH";
 
-	CommandLine cmdline;
-	cmdline.script_path = argv[1];
-	cmdline.destination_path = argv[2];
-	return cmdline;
+    CommandLine cmdline;
+    cmdline.script_path = argv[1];
+    cmdline.destination_path = argv[2];
+    return cmdline;
 }
-
