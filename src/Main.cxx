@@ -33,14 +33,20 @@
 #include "CommandLine.hxx"
 #include "Library.hxx"
 #include "Path.hxx"
+#include "io/FdReader.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "lua/Assert.hxx"
+#include "lua/Json.hxx"
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
 #include "util/PrintException.hxx"
+#include "util/StringAPI.hxx"
+#include "json/Parse.hxx"
+
+#include <boost/json/value.hpp>
 
 extern "C" {
 #include <lauxlib.h>
@@ -67,6 +73,17 @@ static std::string GetParentPath(std::string_view path) noexcept {
     return std::string{path.substr(0, slash)};
 }
 
+static boost::json::value LoadJsonFile(const char *path) {
+    if (StringIsEqual(path, "-")) {
+        FdReader r{FileDescriptor{STDIN_FILENO}};
+        return Json::Parse(r);
+    } else {
+        const auto fd = OpenReadOnly(path);
+        FdReader r{fd};
+        return Json::Parse(r);
+    }
+}
+
 static void SetGlobals(lua_State *L, const CommandLine &cmdline) {
     const Lua::ScopeCheckStack check_stack{L};
 
@@ -80,6 +97,9 @@ static void SetGlobals(lua_State *L, const CommandLine &cmdline) {
         cmdline.destination_path);
     Lua::SetGlobal(L, "path", Lua::RelativeStackIndex{-1});
     lua_pop(L, 1);
+
+    if (cmdline.args_json_path != nullptr)
+        Lua::SetGlobal(L, "args", LoadJsonFile(cmdline.args_json_path));
 }
 
 static int Run(const CommandLine &cmdline) {

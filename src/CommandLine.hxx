@@ -38,6 +38,8 @@ struct CommandLine {
     const char *script_path = nullptr;
 
     const char *destination_path = nullptr;
+
+    const char *args_json_path = nullptr;
 };
 
 CommandLine ParseCommandLine(int argc, char **argv);
