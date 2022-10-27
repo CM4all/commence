@@ -32,7 +32,7 @@
 
 #include "CommandLine.hxx"
 #include "Library.hxx"
-#include "PathDescriptor.hxx"
+#include "Path.hxx"
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
@@ -49,7 +49,7 @@ static void
 SetupLuaState(lua_State *L)
 {
 	luaL_openlibs(L);
-	RegisterLuaPathDescriptor(L);
+	RegisterLuaPath(L);
 	OpenLibrary(L);
 }
 

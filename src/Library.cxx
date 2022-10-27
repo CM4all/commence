@@ -31,7 +31,7 @@
  */
 
 #include "Library.hxx"
-#include "PathDescriptor.hxx"
+#include "Path.hxx"
 #include "lua/Error.hxx"
 #include "lua/Util.hxx"
 #include "io/UniqueFileDescriptor.hxx"

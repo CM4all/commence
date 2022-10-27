@@ -30,17 +30,64 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Path.hxx"
+#include "lua/Class.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 
-struct lua_State;
-class FileDescriptor;
-class UniqueFileDescriptor;
+extern "C" {
+#include <lauxlib.h>
+}
+
+#include <new>
+
+#include <string.h>
+#include <fcntl.h> // for AT_FDCWD
+
+static constexpr char lua_unique_file_descriptor_class[] = "UniqueFileDescriptor";
+using LuaPathDescriptor = Lua::Class<UniqueFileDescriptor,
+				     lua_unique_file_descriptor_class>;
+
+static const UniqueFileDescriptor &
+CastLuaPathDescriptor(lua_State *L, int idx)
+{
+	return LuaPathDescriptor::Cast(L, idx);
+}
+
+static int
+LuaPathDescriptorToString(lua_State *L)
+{
+	if (lua_gettop(L) != 1)
+		return luaL_error(L, "Invalid parameters");
+
+	[[maybe_unused]]
+	const auto &fd = CastLuaPathDescriptor(L, 1);
+
+	// TODO implement
+	return 0;
+}
 
 void
-RegisterLuaPathDescriptor(lua_State *L);
+RegisterLuaPath(lua_State *L)
+{
+	using namespace Lua;
+
+	LuaPathDescriptor::Register(L);
+	SetTable(L, RelativeStackIndex{-1}, "__tostring", LuaPathDescriptorToString);
+	lua_pop(L, 1);
+}
 
 UniqueFileDescriptor *
-NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src);
+NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src)
+{
+	return LuaPathDescriptor::New(L, std::move(src));
+}
 
 FileDescriptor
-GetLuaPathDescriptor(lua_State *L, int idx);
+GetLuaPathDescriptor(lua_State *L, int idx)
+{
+	if (lua_isnil(L, idx)) {
+		return FileDescriptor{AT_FDCWD};
+	} else {
+		return CastLuaPathDescriptor(L, idx);
+	}
+}
