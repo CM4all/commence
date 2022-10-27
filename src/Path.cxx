@@ -43,10 +43,11 @@ extern "C" {
 #include <string.h>
 #include <fcntl.h> // for AT_FDCWD
 
-struct PathDescriptor {
+class PathDescriptor {
 	UniqueFileDescriptor fd;
 	std::string path;
 
+public:
 	PathDescriptor(UniqueFileDescriptor &&_fd,
 		       std::string_view _path) noexcept
 		:fd(std::move(_fd)), path(_path) {}
