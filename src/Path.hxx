@@ -39,7 +39,7 @@ class FileDescriptor;
 class UniqueFileDescriptor;
 
 void
-RegisterLuaPath(lua_State *L);
+RegisterLuaPath(lua_State *L) noexcept;
 
 void
 NewLuaPathDescriptor(lua_State *L, UniqueFileDescriptor src,

@@ -47,7 +47,8 @@ struct PathDescriptor {
 	UniqueFileDescriptor fd;
 	std::string path;
 
-	PathDescriptor(UniqueFileDescriptor &&_fd, std::string_view _path)
+	PathDescriptor(UniqueFileDescriptor &&_fd,
+		       std::string_view _path) noexcept
 		:fd(std::move(_fd)), path(_path) {}
 };
 
@@ -75,7 +76,7 @@ LuaPathDescriptorToString(lua_State *L)
 }
 
 void
-RegisterLuaPath(lua_State *L)
+RegisterLuaPath(lua_State *L) noexcept
 {
 	using namespace Lua;
 
