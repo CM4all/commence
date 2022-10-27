@@ -47,23 +47,19 @@ extern "C" {
 #include <lauxlib.h>
 }
 
-#include <fcntl.h> // for AT_FDCWD
-
 static int
 l_make_directory(lua_State *L)
 {
 	if (lua_gettop(L) != 1)
 		return luaL_error(L, "Invalid parameter count");
 
-	if (!lua_isstring(L, 1))
-		luaL_argerror(L, 1, "path expected");
-
-	const char *path = lua_tostring(L, 1);
+	const auto path = GetLuaPath(L, 1);
 
 	try {
 		NewLuaPathDescriptor(L,
-				     MakeNestedDirectory(FileDescriptor{AT_FDCWD}, path),
-				     path);
+				     MakeNestedDirectory(path.directory_fd,
+							 path.relative_path),
+				     GetLuaPathString(L, 1));
 	} catch (...) {
 		Lua::RaiseCurrent(L);
 	}
@@ -77,21 +73,16 @@ l_recursive_copy(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "Invalid parameter count");
 
-	if (!lua_isstring(L, 1))
-		luaL_argerror(L, 1, "path expected");
-
-	if (!lua_isstring(L, 2))
-		luaL_argerror(L, 2, "path expected");
-
-	const char *source_path = lua_tostring(L, 1);
-	const char *destination_path = lua_tostring(L, 2);
+	const auto source_path = GetLuaPathString(L, 1);
+	const auto destination_path = GetLuaPathString(L, 2);
 
 	constexpr unsigned options = FOX_CP_DEVICE|FOX_CP_INODE;
 
 	try {
 		fox_error_t error;
-		fox_status_t status = fox_copy(source_path, destination_path, options,
-					       &error);
+		fox_status_t status = fox_copy(source_path.c_str(),
+					       destination_path.c_str(),
+					       options, &error);
 		if (status != FOX_STATUS_SUCCESS)
 			throw FormatErrno(status, "Copying '%s' failed", error.pathname);
 	} catch (...) {
@@ -107,13 +98,10 @@ l_recursive_delete(lua_State *L)
 	if (lua_gettop(L) != 1)
 		return luaL_error(L, "Invalid parameter count");
 
-	if (!lua_isstring(L, 1))
-		luaL_argerror(L, 1, "path expected");
-
-	const char *path = lua_tostring(L, 1);
+	const auto path = GetLuaPath(L, 1);
 
 	try {
-		RecursiveDelete(FileDescriptor{AT_FDCWD}, path);
+		RecursiveDelete(path.directory_fd, path.relative_path);
 	} catch (...) {
 		Lua::RaiseCurrent(L);
 	}
