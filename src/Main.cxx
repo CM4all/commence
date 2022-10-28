@@ -33,6 +33,7 @@
 #include "CommandLine.hxx"
 #include "Library.hxx"
 #include "Path.hxx"
+#include "Random.hxx"
 #include "io/FdReader.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
@@ -59,6 +60,7 @@ extern "C" {
 static void SetupLuaState(lua_State *L) {
     luaL_openlibs(L);
     RegisterLuaPath(L);
+    RegisterLuaRandom(L);
     OpenLibrary(L);
 }
 
