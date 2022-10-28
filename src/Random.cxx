@@ -2,7 +2,7 @@
  * Copyright 2017-2022 CM4all GmbH
  * All rights reserved.
  *
- * author: Max Kellermann <mk@cm4all.com>
+ * author: Babak Vahedipour <bk@cm4all.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,14 +38,22 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include <random>
+#include <stdexcept>
 #include <string>
+
+static std::random_device device;
+static std::mt19937 prng;
+static int seeded = 0;
 
 class Random {
 
     std::string alphabet;
+    mutable std::uniform_int_distribution<> d;
 
   public:
-    Random(std::string_view _alphabet) noexcept : alphabet(_alphabet) {}
+    Random(std::string_view _alphabet) noexcept
+        : alphabet(_alphabet), d(0, _alphabet.size() - 1) {}
 
     static int New(lua_State *L);
     static int Make(lua_State *L);
@@ -63,23 +71,35 @@ int Random::New(lua_State *L) {
 
     if (lua_gettop(L) != 2)
         return luaL_error(L, "Invalid parameters");
-
     if (!lua_isstring(L, 2))
         luaL_argerror(L, 2, "string expected");
-
-    const char *alphabet = lua_tostring(L, 2);
+    size_t length;
+    const char *alphabet = lua_tolstring(L, 2, &length);
+    if (length < 2)
+        luaL_argerror(L, 2, "alphabet string too short");
+    if (!seeded) {
+        seeded = 1;
+        prng.seed(device());
+    }
     LuaRandom::New(L, alphabet);
     return 1;
 }
 
 int Random::Make(lua_State *L) {
 
-    if (lua_gettop(L) != 1)
+    if (lua_gettop(L) != 2)
         return luaL_error(L, "Invalid parameters");
-
+    if (!lua_isnumber(L, 2))
+        luaL_argerror(L, 2, "integer expected");
+    auto length = lua_tointeger(L, 2);
+    if (length < 1 || length >= 256)
+        luaL_argerror(L, 2, "argument must be > 0 && < 256 ");
     const auto &rd = CastLuaRandom(L, 1);
-
-    Lua::Push(L, rd.alphabet);
+    char buffer[256];
+    for (lua_Integer i = 0; i < length; i++)
+        buffer[i] = rd.alphabet[rd.d(prng)];
+    buffer[length] = 0;
+    Lua::Push(L, buffer);
     return 1;
 }
 
