@@ -73,6 +73,9 @@ void RegisterLuaRandom(lua_State *L) {
     using namespace Lua;
 
     LuaRandom::Register(L);
+
+    lua_newtable(L);
     SetTable(L, RelativeStackIndex{-1}, "make", Random::Make);
+    lua_setfield(L, -2, "__index");
     lua_pop(L, 1);
 }
