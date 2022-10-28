@@ -36,6 +36,7 @@
 #include "io/FileWriter.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
+#include "io/RecursiveCopy.hxx"
 #include "io/RecursiveDelete.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "lua/Error.hxx"
@@ -43,10 +44,6 @@
 #include "system/Error.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
-
-extern "C" {
-#include <fox/cp.h>
-}
 
 extern "C" {
 #include <lauxlib.h>
@@ -76,17 +73,12 @@ static int l_recursive_copy(lua_State *L) {
     if (lua_gettop(L) != 2)
         return luaL_error(L, "Invalid parameter count");
 
-    const auto source_path = GetLuaPathString(L, 1);
-    const auto destination_path = GetLuaPathString(L, 2);
-
-    constexpr unsigned options = FOX_CP_DEVICE | FOX_CP_INODE;
+    const auto source = GetLuaPath(L, 1);
+    const auto destination = GetLuaPath(L, 2);
 
     try {
-        fox_error_t error;
-        fox_status_t status = fox_copy(
-            source_path.c_str(), destination_path.c_str(), options, &error);
-        if (status != FOX_STATUS_SUCCESS)
-            throw FormatErrno(status, "Copying '%s' failed", error.pathname);
+        RecursiveCopy(source.directory_fd, source.relative_path,
+                      destination.directory_fd, destination.relative_path);
     } catch (...) {
         Lua::RaiseCurrent(L);
     }

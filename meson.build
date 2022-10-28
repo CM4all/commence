@@ -101,8 +101,6 @@ add_global_arguments(common_flags, language: 'cpp')
 add_global_arguments(compiler.get_supported_arguments(test_global_cxxflags), language: 'cpp')
 add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
 
-libfox = dependency('libcm4all-fox', version: '>= 2.0')
-
 inc = include_directories('src', 'libcommon/src')
 
 libcommon_enable_c = false
@@ -130,7 +128,6 @@ executable('cm4all-commence',
     util_dep,
     lua_dep,
     boost_json_dep,
-    libfox,
   ],
   install: true,
   install_dir: 'bin',
