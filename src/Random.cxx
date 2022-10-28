@@ -47,6 +47,7 @@ class Random {
   public:
     Random(std::string_view _alphabet) noexcept : alphabet(_alphabet) {}
 
+    static int New(lua_State *L);
     static int Make(lua_State *L);
 };
 
@@ -56,6 +57,19 @@ using LuaRandom = Lua::Class<Random, lua_random_class>;
 static const auto &CastLuaRandom(lua_State *L, int idx) {
 
     return LuaRandom::Cast(L, idx);
+}
+
+int Random::New(lua_State *L) {
+
+    if (lua_gettop(L) != 2)
+        return luaL_error(L, "Invalid parameters");
+
+    if (!lua_isstring(L, 2))
+        luaL_argerror(L, 2, "string expected");
+
+    const char *alphabet = lua_tostring(L, 2);
+    LuaRandom::New(L, alphabet);
+    return 1;
 }
 
 int Random::Make(lua_State *L) {
@@ -78,4 +92,8 @@ void RegisterLuaRandom(lua_State *L) {
     SetTable(L, RelativeStackIndex{-1}, "make", Random::Make);
     lua_setfield(L, -2, "__index");
     lua_pop(L, 1);
+
+    lua_newtable(L);
+    SetTable(L, RelativeStackIndex{-1}, "new", Random::New);
+    lua_setglobal(L, "Random");
 }
