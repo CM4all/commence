@@ -57,6 +57,7 @@ class PathDescriptor {
     operator PathReference() const noexcept { return {fd, ""}; }
 
     static int ToString(lua_State *L);
+    static int Concat(lua_State *L);
     static int Div(lua_State *L);
 };
 
@@ -78,6 +79,7 @@ class RelativePath {
     std::string GetPath() const noexcept { return base.GetPath() + "/" + path; }
 
     static int ToString(lua_State *L);
+    static int Concat(lua_State *L);
     static int Div(lua_State *L);
 };
 
@@ -113,6 +115,20 @@ int PathDescriptor::ToString(lua_State *L) {
     return 1;
 }
 
+int PathDescriptor::Concat(lua_State *L) {
+    if (lua_gettop(L) != 2)
+        return luaL_error(L, "Invalid parameters");
+
+    const auto &pd = CastLuaPathDescriptor(L, 1);
+
+    if (!lua_isstring(L, 2))
+        luaL_argerror(L, 2, "string expected");
+
+    const char *s = lua_tostring(L, 2);
+    Lua::Push(L, pd.path + s);
+    return 1;
+}
+
 int PathDescriptor::Div(lua_State *L) {
     if (lua_gettop(L) != 2)
         return luaL_error(L, "Invalid parameters");
@@ -137,6 +153,20 @@ int RelativePath::ToString(lua_State *L) {
     return 1;
 }
 
+int RelativePath::Concat(lua_State *L) {
+    if (lua_gettop(L) != 2)
+        return luaL_error(L, "Invalid parameters");
+
+    const auto &rp = CastLuaRelativePath(L, 1);
+
+    if (!lua_isstring(L, 2))
+        luaL_argerror(L, 2, "string expected");
+
+    const char *s = lua_tostring(L, 2);
+    Lua::Push(L, rp.path + s);
+    return 1;
+}
+
 int RelativePath::Div(lua_State *L) {
     if (lua_gettop(L) != 2)
         return luaL_error(L, "Invalid parameters");
@@ -157,11 +187,13 @@ void RegisterLuaPath(lua_State *L) noexcept {
 
     LuaPathDescriptor::Register(L);
     SetTable(L, RelativeStackIndex{-1}, "__tostring", PathDescriptor::ToString);
+    SetTable(L, RelativeStackIndex{-1}, "__concat", PathDescriptor::Concat);
     SetTable(L, RelativeStackIndex{-1}, "__div", PathDescriptor::Div);
     lua_pop(L, 1);
 
     LuaRelativePath::Register(L);
     SetTable(L, RelativeStackIndex{-1}, "__tostring", RelativePath::ToString);
+    SetTable(L, RelativeStackIndex{-1}, "__concat", RelativePath::Concat);
     SetTable(L, RelativeStackIndex{-1}, "__div", RelativePath::Div);
     lua_pop(L, 1);
 }
