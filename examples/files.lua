@@ -1,6 +1,6 @@
 recursive_delete(path/"foo")
-make_directory(path/"foo/a/b")
-recursive_copy(src/"../src", path/"foo/a/b");
+d=make_directory(path/"foo/a/b")
+recursive_copy(src/"../src", d)
 
 name="world"
 r=Random:new("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_ []{}<>~`+=,.;:/?|")
