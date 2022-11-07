@@ -43,6 +43,7 @@
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
+#include "lua/mariadb/Init.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringAPI.hxx"
 #include "json/Parse.hxx"
@@ -59,6 +60,7 @@ extern "C" {
 
 static void SetupLuaState(lua_State *L) {
     luaL_openlibs(L);
+    Lua::MariaDB::Init(L);
     RegisterLuaPath(L);
     RegisterLuaRandom(L);
     OpenLibrary(L);

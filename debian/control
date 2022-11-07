@@ -6,6 +6,7 @@ Build-Depends: debhelper (>= 13.3~),
  meson (>= 0.56),
  g++ (>= 4:10),
  libc6-dev (>= 2.13),
+ libmariadb-dev,
  libluajit-5.1-dev
 Standards-Version: 4.0.0
 Vcs-Browser: http://dev.intern.cm-ag/core/commence

@@ -110,6 +110,8 @@ libcommon_enable_json = true
 subdir('libcommon/src/util')
 subdir('libcommon/src/json')
 subdir('libcommon/src/lua')
+subdir('libcommon/src/lib/mariadb')
+subdir('libcommon/src/lua/mariadb')
 subdir('libcommon/src/io')
 subdir('libcommon/src/system')
 subdir('libcommon/src/net')
@@ -127,6 +129,7 @@ executable('cm4all-commence',
     io_dep,
     util_dep,
     lua_dep,
+    lua_mariadb_dep,
     boost_json_dep,
   ],
   install: true,
