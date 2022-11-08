@@ -40,6 +40,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "lua/Assert.hxx"
 #include "lua/Json.hxx"
+#include "lua/ToJson.hxx"
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
@@ -60,6 +61,7 @@ extern "C" {
 
 static void SetupLuaState(lua_State *L) {
     luaL_openlibs(L);
+    Lua::InitToJson(L);
     Lua::MariaDB::Init(L);
     RegisterLuaPath(L);
     RegisterLuaRandom(L);
