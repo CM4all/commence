@@ -1,4 +1,4 @@
 Hello, {{name}}!
 Installing from {{src}} to {{path}}.
 args.db.user={{args.db.user}}
-random={{r:make()}}
+random={{r:make(16)}}
