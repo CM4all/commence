@@ -2,3 +2,7 @@ Hello, {{name}}!
 Installing from {{src}} to {{path}}.
 args.db.user={{args.db.user}}
 random={{r:make(16)}}
+pwhash_argon={{pwhash(args.password)}}
+pwhash_argon2i={{pwhash(args.password, '$argon2i$')}}
+pwhash_argon2id={{pwhash(args.password, '$argon2id$')}}
+pwhash_sha512={{pwhash(args.password, '$6$')}}

@@ -33,6 +33,7 @@
 #include "CommandLine.hxx"
 #include "Library.hxx"
 #include "Path.hxx"
+#include "PwHash.hxx"
 #include "Random.hxx"
 #include "io/FdReader.hxx"
 #include "io/MakeDirectory.hxx"
@@ -65,6 +66,7 @@ static void SetupLuaState(lua_State *L) {
     Lua::MariaDB::Init(L);
     RegisterLuaPath(L);
     RegisterLuaRandom(L);
+    Lua::RegisterPwHash(L);
     OpenLibrary(L);
 }
 
