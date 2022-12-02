@@ -40,6 +40,7 @@ extern "C" {
 }
 
 #include <stdexcept>
+#include <string>
 
 using std::string_view_literals::operator""sv;
 
