@@ -108,6 +108,7 @@ libcommon_enable_net_log = false
 libcommon_enable_json = true
 
 subdir('libcommon/src/util')
+subdir('libcommon/src/lib/fmt')
 subdir('libcommon/src/json')
 subdir('libcommon/src/lua')
 subdir('libcommon/src/lib/mariadb')
@@ -133,6 +134,7 @@ executable('cm4all-commence',
     lua_dep,
     lua_mariadb_dep,
     boost_json_dep,
+    fmt_dep,
     dependency('libsodium'),
     dependency('libcrypt'),
   ],

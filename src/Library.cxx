@@ -39,10 +39,10 @@
 #include "io/RecursiveCopy.hxx"
 #include "io/RecursiveDelete.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "lua/Error.hxx"
 #include "lua/Util.hxx"
-#include "system/Error.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
 
 extern "C" {
@@ -113,17 +113,17 @@ static int l_copy_template(lua_State *L) try {
 
     struct stat st;
     if (fstat(source_fd.Get(), &st) < 0)
-        throw FormatErrno("Failed to stat %s", source.relative_path);
+        throw FmtErrno("Failed to stat {}", source.relative_path);
 
     if (st.st_size > 1024 * 1024)
-        throw FormatRuntimeError("File too large: %s", source.relative_path);
+        throw FmtRuntimeError("File too large: {}", source.relative_path);
 
     std::size_t source_size = st.st_size;
 
     char *source_data = (char *)mmap(nullptr, source_size, PROT_READ,
                                      MAP_SHARED, source_fd.Get(), 0);
     if (source_data == (char *)-1)
-        throw FormatErrno("Failed to map %s", source.relative_path);
+        throw FmtErrno("Failed to map {}", source.relative_path);
 
     AtScopeExit(source_data, source_size) { munmap(source_data, source_size); };
 

@@ -7,6 +7,7 @@ Build-Depends: debhelper (>= 13.3~),
  g++ (>= 4:10),
  libc6-dev (>= 2.13),
  libcrypt-dev,
+ libfmt-dev (>= 7),
  libmariadb-dev,
  libsodium-dev,
  libluajit-5.1-dev
