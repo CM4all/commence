@@ -17,7 +17,7 @@ common_flags = [
 test_common_flags = [
   '-Wcast-align',
   '-Wcast-qual',
-  #'-Wdouble-promotion', (disabled due to boost::json)
+  '-Wdouble-promotion',
   '-Wfloat-equal',
   '-Wmissing-declarations',
   '-Wmissing-noreturn',
