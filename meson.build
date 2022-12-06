@@ -104,7 +104,6 @@ add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language:
 inc = include_directories('src', 'libcommon/src')
 
 libcommon_enable_c = false
-libcommon_enable_net_log = false
 libcommon_enable_json = true
 
 subdir('libcommon/src/util')
