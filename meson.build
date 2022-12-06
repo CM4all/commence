@@ -104,12 +104,12 @@ add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language:
 inc = include_directories('src', 'libcommon/src')
 
 libcommon_enable_c = false
-libcommon_enable_json = true
 
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
 subdir('libcommon/src/json')
 subdir('libcommon/src/lua')
+subdir('libcommon/src/lua/json')
 subdir('libcommon/src/lib/mariadb')
 subdir('libcommon/src/lua/mariadb')
 subdir('libcommon/src/io')
@@ -131,6 +131,7 @@ executable('cm4all-commence',
     util_dep,
     system_dep,
     lua_dep,
+    lua_json_dep,
     lua_mariadb_dep,
     boost_json_dep,
     fmt_dep,
