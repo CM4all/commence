@@ -103,8 +103,6 @@ add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language:
 
 inc = include_directories('src', 'libcommon/src')
 
-libcommon_enable_c = false
-
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
 subdir('libcommon/src/json')
