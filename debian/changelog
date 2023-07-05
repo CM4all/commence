@@ -1,6 +1,7 @@
 cm4all-commence (0.2) unstable; urgency=low
 
   * updated libcommon
+  * add build-dependency for pkg-config
 
  -- 
 
