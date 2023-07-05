@@ -3,7 +3,7 @@ Section: non-free/admin
 Priority: extra
 Maintainer: Max Kellermann <mk@cm4all.com>
 Build-Depends: debhelper (>= 13.3~),
- meson (>= 0.56),
+ meson (>= 0.56), pkg-config,
  g++ (>= 4:10),
  libc6-dev (>= 2.13),
  libcrypt-dev,
