@@ -107,7 +107,7 @@ libcommon_require_mariadb = get_option('mariadb')
 
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
-subdir('libcommon/src/json')
+subdir('libcommon/src/lib/nlohmann_json')
 subdir('libcommon/src/lua')
 subdir('libcommon/src/lua/json')
 subdir('libcommon/src/lib/mariadb')
@@ -143,7 +143,7 @@ executable('cm4all-commence',
     lua_dep,
     lua_json_dep,
     lua_mariadb_dep,
-    boost_json_dep,
+    nlohmann_json_dep,
     fmt_dep,
     dependency('libsodium'),
     dependency('libcrypt'),

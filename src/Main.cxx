@@ -48,15 +48,16 @@
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
+#include "system/Error.hxx"
 #include "util/PrintException.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringAPI.hxx"
-#include "json/Parse.hxx"
 
 #ifdef HAVE_MARIADB
 #include "lua/mariadb/Init.hxx"
 #endif
 
-#include <boost/json/value.hpp>
+#include <nlohmann/json.hpp>
 
 extern "C" {
 #include <lauxlib.h>
@@ -89,14 +90,26 @@ static std::string GetParentPath(std::string_view path) noexcept {
     return std::string{path.substr(0, slash)};
 }
 
-static boost::json::value LoadJsonFile(const char *path) {
+static nlohmann::json LoadJsonFile(FileDescriptor fd) {
+    std::string contents;
+    while (true) {
+        std::array<std::byte, 16384> buffer;
+        auto nbytes = fd.Read(buffer);
+        if (nbytes < 0)
+            throw MakeErrno("Failed to read JSON file");
+        if (nbytes == 0)
+            break;
+        contents.append(ToStringView(buffer));
+    }
+
+    return nlohmann::json::parse(contents);
+}
+
+static nlohmann::json LoadJsonFile(const char *path) {
     if (StringIsEqual(path, "-")) {
-        FdReader r{FileDescriptor{STDIN_FILENO}};
-        return Json::Parse(r);
+        return LoadJsonFile(FileDescriptor{STDIN_FILENO});
     } else {
-        const auto fd = OpenReadOnly(path);
-        FdReader r{fd};
-        return Json::Parse(r);
+        return LoadJsonFile(OpenReadOnly(path));
     }
 }
 
