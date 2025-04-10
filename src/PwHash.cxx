@@ -148,7 +148,7 @@ static auto GenerateCryptSalt() {
 }
 
 static int l_sha512_pwhash(lua_State *L, const char *password) {
-    struct crypt_data crypt_data {};
+    struct crypt_data crypt_data{};
     const auto salt = GenerateCryptSalt();
     const char *hash = crypt_r(password, salt.data(), &crypt_data);
     if (hash == nullptr)
