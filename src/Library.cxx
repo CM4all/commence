@@ -44,6 +44,7 @@
 #include "lua/Error.hxx"
 #include "lua/Util.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/SpanCast.hxx"
 
 extern "C" {
 #include <lauxlib.h>
@@ -131,7 +132,7 @@ static int l_copy_template(lua_State *L) try {
 
     FileWriter writer{destination.directory_fd, destination.relative_path};
     RunTemplate(L, {source_data, source_size},
-                [&writer](auto s) { writer.Write(s.data(), s.size()); });
+                [&writer](auto s) { writer.Write(AsBytes(s)); });
 
     writer.Commit();
 
