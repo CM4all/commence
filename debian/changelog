@@ -1,6 +1,6 @@
 cm4all-commence (0.2) unstable; urgency=low
 
-  * 
+  * make MariaDB support optional
 
  --   
 

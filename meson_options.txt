@@ -1,0 +1,1 @@
+option('mariadb', type: 'feature', description: 'MariaDB support')

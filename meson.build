@@ -101,7 +101,9 @@ add_global_arguments(common_flags, language: 'cpp')
 add_global_arguments(compiler.get_supported_arguments(test_global_cxxflags), language: 'cpp')
 add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
 
-inc = include_directories('src', 'libcommon/src')
+inc = include_directories('.', 'src', 'libcommon/src')
+
+libcommon_require_mariadb = get_option('mariadb')
 
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
@@ -109,10 +111,20 @@ subdir('libcommon/src/json')
 subdir('libcommon/src/lua')
 subdir('libcommon/src/lua/json')
 subdir('libcommon/src/lib/mariadb')
-subdir('libcommon/src/lua/mariadb')
+
+if mariadb_dep.found()
+  subdir('libcommon/src/lua/mariadb')
+else
+  lua_mariadb_dep = mariadb_dep
+endif
+
 subdir('libcommon/src/io')
 subdir('libcommon/src/system')
 subdir('libcommon/src/net')
+
+conf = configuration_data()
+conf.set('HAVE_MARIADB', mariadb_dep.found())
+configure_file(output: 'config.h', configuration: conf)
 
 executable('cm4all-commence',
   'src/CommandLine.cxx',

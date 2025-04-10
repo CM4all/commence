@@ -35,6 +35,7 @@
 #include "Path.hxx"
 #include "PwHash.hxx"
 #include "Random.hxx"
+#include "config.h"
 #include "io/FdReader.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
@@ -45,10 +46,13 @@
 #include "lua/Util.hxx"
 #include "lua/json/Push.hxx"
 #include "lua/json/ToJson.hxx"
-#include "lua/mariadb/Init.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringAPI.hxx"
 #include "json/Parse.hxx"
+
+#ifdef HAVE_MARIADB
+#include "lua/mariadb/Init.hxx"
+#endif
 
 #include <boost/json/value.hpp>
 
@@ -63,7 +67,9 @@ extern "C" {
 static void SetupLuaState(lua_State *L) {
     luaL_openlibs(L);
     Lua::InitToJson(L);
+#ifdef HAVE_MARIADB
     Lua::MariaDB::Init(L);
+#endif
     RegisterLuaPath(L);
     RegisterLuaRandom(L);
     Lua::RegisterPwHash(L);
