@@ -40,12 +40,14 @@
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+
+#include "lua/json/Push.hxx"
+#include "lua/json/ToJson.hxx"
+
 #include "lua/Assert.hxx"
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
 #include "lua/Util.hxx"
-#include "lua/json/Push.hxx"
-#include "lua/json/ToJson.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringAPI.hxx"
 #include "json/Parse.hxx"
