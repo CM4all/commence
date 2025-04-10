@@ -99,7 +99,7 @@ static nlohmann::json LoadJsonFile(FileDescriptor fd) {
             throw MakeErrno("Failed to read JSON file");
         if (nbytes == 0)
             break;
-        contents.append(ToStringView(buffer));
+        contents.append(ToStringView(std::span<const std::byte>{buffer}));
     }
 
     return nlohmann::json::parse(contents);
