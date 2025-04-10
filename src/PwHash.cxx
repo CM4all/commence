@@ -128,7 +128,7 @@ static auto GenerateCryptSalt() {
     static constexpr std::size_t SALT_CHARS = 16;
 
     std::array<uint8_t, SALT_CHARS> r;
-    UrandomFill(&r, sizeof(r));
+    UrandomFill(std::as_writable_bytes(std::span(r)));
 
     std::array<char, 3 + SALT_CHARS + 1> salt;
     char *p = salt.data();
