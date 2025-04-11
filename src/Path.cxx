@@ -213,7 +213,7 @@ PathReference GetLuaPath(lua_State *L, int idx) {
         return *r;
     } else {
         luaL_argerror(L, idx, "path expected");
-	std::unreachable();
+        std::unreachable();
     }
 }
 
@@ -226,6 +226,6 @@ std::string GetLuaPathString(lua_State *L, int idx) {
         return r->GetPath();
     } else {
         luaL_argerror(L, idx, "path expected");
-	std::unreachable();
+        std::unreachable();
     }
 }
