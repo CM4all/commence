@@ -1,4 +1,4 @@
-project('CM4all Commence', 'cpp', version: '0.2',
+project('CM4all Commence', 'cpp', version: '0.3',
   meson_version: '>= 1.2',
   default_options : [
     'cpp_std=c++23',

@@ -1,4 +1,4 @@
-cm4all-commence (0.2) unstable; urgency=low
+cm4all-commence (0.3) unstable; urgency=low
 
   * migrate from nlohmann::json to boost::json
   * make JSON, libcrypt, libsodium, MariaDB support optional
