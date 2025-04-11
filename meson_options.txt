@@ -1,1 +1,2 @@
+option('json', type: 'feature', description: 'JSON support')
 option('mariadb', type: 'feature', description: 'MariaDB support')

@@ -36,13 +36,17 @@
 #include "PwHash.hxx"
 #include "Random.hxx"
 #include "config.h"
-#include "io/FdReader.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
+#ifdef HAVE_JSON
+#include "io/FdReader.hxx"
 #include "lua/json/Push.hxx"
 #include "lua/json/ToJson.hxx"
+
+#include <nlohmann/json.hpp>
+#endif
 
 #include "lua/Assert.hxx"
 #include "lua/RunFile.hxx"
@@ -57,8 +61,6 @@
 #include "lua/mariadb/Init.hxx"
 #endif
 
-#include <nlohmann/json.hpp>
-
 extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
@@ -69,7 +71,9 @@ extern "C" {
 
 static void SetupLuaState(lua_State *L) {
     luaL_openlibs(L);
+#ifdef HAVE_JSON
     Lua::InitToJson(L);
+#endif
 #ifdef HAVE_MARIADB
     Lua::MariaDB::Init(L);
 #endif
@@ -89,6 +93,8 @@ static std::string GetParentPath(std::string_view path) noexcept {
 
     return std::string{path.substr(0, slash)};
 }
+
+#ifdef HAVE_JSON
 
 static nlohmann::json LoadJsonFile(FileDescriptor fd) {
     std::string contents;
@@ -113,6 +119,8 @@ static nlohmann::json LoadJsonFile(const char *path) {
     }
 }
 
+#endif // HAVE_JSON
+
 static void SetGlobals(lua_State *L, const CommandLine &cmdline) {
     const Lua::ScopeCheckStack check_stack{L};
 
@@ -127,8 +135,10 @@ static void SetGlobals(lua_State *L, const CommandLine &cmdline) {
     Lua::SetGlobal(L, "path", Lua::RelativeStackIndex{-1});
     lua_pop(L, 1);
 
+#ifdef HAVE_JSON
     if (cmdline.args_json_path != nullptr)
         Lua::SetGlobal(L, "args", LoadJsonFile(cmdline.args_json_path));
+#endif
 }
 
 static int Run(const CommandLine &cmdline) {

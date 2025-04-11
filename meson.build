@@ -105,14 +105,20 @@ add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language:
 
 inc = include_directories('.', 'src', 'libcommon/src')
 
+libcommon_enable_json = get_option('json')
 libcommon_require_mariadb = get_option('mariadb')
 
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
 subdir('libcommon/src/lib/nlohmann_json')
 subdir('libcommon/src/lua')
-subdir('libcommon/src/lua/json')
 subdir('libcommon/src/lib/mariadb')
+
+if nlohmann_json_dep.found()
+  subdir('libcommon/src/lua/json')
+else
+  lua_json_dep = nlohmann_json_dep
+endif
 
 if mariadb_dep.found()
   subdir('libcommon/src/lua/mariadb')
@@ -125,6 +131,7 @@ subdir('libcommon/src/system')
 subdir('libcommon/src/net')
 
 conf = configuration_data()
+conf.set('HAVE_JSON', nlohmann_json_dep.found())
 conf.set('HAVE_MARIADB', mariadb_dep.found())
 configure_file(output: 'config.h', configuration: conf)
 
