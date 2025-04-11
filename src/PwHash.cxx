@@ -36,6 +36,8 @@
 #include "system/Error.hxx"
 #include "system/Urandom.hxx"
 
+#include "config.h"
+
 extern "C" {
 #include <lauxlib.h>
 }
