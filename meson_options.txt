@@ -1,2 +1,3 @@
 option('json', type: 'feature', description: 'JSON support')
+option('libcrypt', type: 'feature', description: 'use libcrypt for SHA512 password hashes')
 option('mariadb', type: 'feature', description: 'MariaDB support')

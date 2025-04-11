@@ -108,6 +108,8 @@ inc = include_directories('.', 'src', 'libcommon/src')
 libcommon_enable_json = get_option('json')
 libcommon_require_mariadb = get_option('mariadb')
 
+libcrypt = dependency('libcrypt', required: get_option('libcrypt'))
+
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
 subdir('libcommon/src/lib/nlohmann_json')
@@ -132,6 +134,7 @@ subdir('libcommon/src/net')
 
 conf = configuration_data()
 conf.set('HAVE_JSON', nlohmann_json_dep.found())
+conf.set('HAVE_LIBCRYPT', libcrypt.found())
 conf.set('HAVE_MARIADB', mariadb_dep.found())
 configure_file(output: 'config.h', configuration: conf)
 
@@ -155,7 +158,7 @@ executable('cm4all-commence',
     nlohmann_json_dep,
     fmt_dep,
     dependency('libsodium'),
-    dependency('libcrypt'),
+    libcrypt,
   ],
   install: true,
   install_dir: 'bin',

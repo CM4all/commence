@@ -42,7 +42,9 @@ extern "C" {
 
 #include <sodium/crypto_pwhash.h>
 
+#ifdef HAVE_LIBCRYPT
 #include <crypt.h>
+#endif
 
 #include <array>
 #include <stdexcept>
@@ -120,6 +122,8 @@ static int l_sodium_pwhash(lua_State *L, std::string_view password) {
     return 1;
 }
 
+#ifdef HAVE_LIBCRYPT
+
 /**
  * Generate a SHA-512 salt for crypt_r() and return it as a
  * null-terminated std::array<char>.
@@ -158,6 +162,8 @@ static int l_sha512_pwhash(lua_State *L, const char *password) {
     return 1;
 }
 
+#endif // HAVE_LIBCRYPT
+
 static int l_pwhash(lua_State *L) {
     const auto password = CheckString(L, 1);
     const auto setting = OptString(L, 2);
@@ -172,8 +178,10 @@ static int l_pwhash(lua_State *L) {
             return l_sodium_pwhash<PwHashArgon2i>(L, password);
         else if (setting == crypto_pwhash_argon2id_STRPREFIX)
             return l_sodium_pwhash<PwHashArgon2id>(L, password);
+#ifdef HAVE_LIBCRYPT
         else if (setting == "$6$"sv)
             return l_sha512_pwhash(L, password.data());
+#endif
         else {
             luaL_argerror(L, 2, "Unrecognized setting");
             abort();
