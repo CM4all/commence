@@ -40,6 +40,7 @@ extern "C" {
 }
 
 #include <string>
+#include <utility> // for std::unreachable()
 
 #include <fcntl.h> // for AT_FDCWD
 #include <string.h>
@@ -212,7 +213,7 @@ PathReference GetLuaPath(lua_State *L, int idx) {
         return *r;
     } else {
         luaL_argerror(L, idx, "path expected");
-        return {}; // unreachable
+	std::unreachable();
     }
 }
 
@@ -225,6 +226,6 @@ std::string GetLuaPathString(lua_State *L, int idx) {
         return r->GetPath();
     } else {
         luaL_argerror(L, idx, "path expected");
-        return {}; // unreachable
+	std::unreachable();
     }
 }
