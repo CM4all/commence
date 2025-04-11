@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 13.3~),
  nlohmann-json3-dev (>= 3.11),
  libc6-dev (>= 2.13),
  libcrypt-dev,
- libfmt-dev (>= 7),
+ libfmt-dev (>= 9),
  libmariadb-dev,
  libsodium-dev,
  libluajit-5.1-dev
