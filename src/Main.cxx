@@ -33,12 +33,15 @@
 #include "CommandLine.hxx"
 #include "Library.hxx"
 #include "Path.hxx"
-#include "PwHash.hxx"
 #include "Random.hxx"
 #include "config.h"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+
+#ifdef HAVE_SODIUM
+#include "PwHash.hxx"
+#endif
 
 #ifdef HAVE_JSON
 #include "io/FdReader.hxx"
@@ -79,7 +82,9 @@ static void SetupLuaState(lua_State *L) {
 #endif
     RegisterLuaPath(L);
     RegisterLuaRandom(L);
+#ifdef HAVE_SODIUM
     Lua::RegisterPwHash(L);
+#endif
     OpenLibrary(L);
 }
 

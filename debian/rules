@@ -5,6 +5,7 @@ MESON_OPTIONS = \
 	-Djson=enabled \
 	-Dlibcrypt=enabled \
 	-Dmariadb=enabled \
+	-Dsodium=enabled \
 	--werror
 
 %:

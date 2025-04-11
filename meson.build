@@ -109,6 +109,7 @@ libcommon_enable_json = get_option('json')
 libcommon_require_mariadb = get_option('mariadb')
 
 libcrypt = dependency('libcrypt', required: get_option('libcrypt'))
+libsodium = dependency('libsodium', required: get_option('sodium'))
 
 subdir('libcommon/src/util')
 subdir('libcommon/src/lib/fmt')
@@ -136,7 +137,14 @@ conf = configuration_data()
 conf.set('HAVE_JSON', nlohmann_json_dep.found())
 conf.set('HAVE_LIBCRYPT', libcrypt.found())
 conf.set('HAVE_MARIADB', mariadb_dep.found())
+conf.set('HAVE_SODIUM', libsodium.found())
 configure_file(output: 'config.h', configuration: conf)
+
+sources = []
+
+if libsodium.found()
+  sources += 'src/PwHash.cxx'
+endif
 
 executable('cm4all-commence',
   'src/CommandLine.cxx',
@@ -144,8 +152,8 @@ executable('cm4all-commence',
   'src/Library.cxx',
   'src/Path.cxx',
   'src/Template.cxx',
-  'src/PwHash.cxx',
   'src/Random.cxx',
+  sources,
   include_directories: inc,
   dependencies: [
     liblua,
@@ -157,7 +165,7 @@ executable('cm4all-commence',
     lua_mariadb_dep,
     nlohmann_json_dep,
     fmt_dep,
-    dependency('libsodium'),
+    libsodium,
     libcrypt,
   ],
   install: true,
