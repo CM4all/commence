@@ -134,7 +134,6 @@ endif
 
 subdir('libcommon/src/io')
 subdir('libcommon/src/system')
-subdir('libcommon/src/net')
 
 conf = configuration_data()
 conf.set('HAVE_JSON', nlohmann_json_dep.found())
