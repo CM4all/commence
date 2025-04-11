@@ -1,5 +1,5 @@
 project('CM4all Commence', 'cpp', version: '0.2',
-  meson_version: '>= 0.56',
+  meson_version: '>= 1.2',
   default_options : [
     'cpp_std=c++2a',
     'warning_level=3',
