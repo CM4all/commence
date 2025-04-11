@@ -4,6 +4,9 @@ project('CM4all Commence', 'cpp', version: '0.2',
     'cpp_std=c++23',
     'warning_level=3',
 
+    # This is only here to build subprojects as static libraries
+    'default_library=static',
+
     'fmt:cpp_std=c++23',
   ],
 )
